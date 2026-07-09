@@ -91,6 +91,22 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Serve uploaded PDFs (for development purposes)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve built frontend (production)
+const clientDist = path.join(__dirname, '..', 'dist');
+app.use(express.static(clientDist));
+
+// SPA fallback - serve index.html for all non-API routes
+app.get(/^(?!\/api\/).*/, (req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'), (err) => {
+    if (err) {
+      res.status(404).json({
+        success: false,
+        message: 'Frontend not built. Run "npm run build" first.',
+      });
+    }
+  });
+});
+
 // =====================
 // ROUTES
 // =====================
