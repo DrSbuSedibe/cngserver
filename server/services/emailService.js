@@ -95,7 +95,7 @@ const classifyEmailError = (error) => {
   }
 
   if (code === 'ETIMEDOUT' || code === 'ESOCKET' || /timeout|timed out/i.test(message)) {
-    return 'SMTP connection timed out. Render may not allow outbound SMTP connections. Consider using Resend or another email API service.';
+    return 'SMTP connection timed out. Render may not allow outbound SMTP connections.';
   }
 
   if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
@@ -183,7 +183,7 @@ const verifyEmailConnection = async () => {
       await verifyOnPort(alternatePort);
       console.warn(`[EMAIL] Gmail SMTP works on port ${alternatePort}. Consider updating SMTP_PORT in Render.`);
     } catch (alternateError) {
-      throw new Error(`Gmail SMTP failed on both ports ${SMTP_PORT} and ${alternatePort}. Render may block SMTP. Use Resend instead.`);
+      throw new Error(`Gmail SMTP failed on both ports ${SMTP_PORT} and ${alternatePort}. Render may block SMTP connections.`);
     }
   }
 };
