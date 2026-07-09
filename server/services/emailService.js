@@ -1,12 +1,20 @@
+const fs = require('fs/promises');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const axios = require('axios');
 
+const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || (process.env.RESEND_API_KEY ? 'resend' : 'smtp')).toLowerCase();
 const EMAIL_USER = process.env.EMAIL_USER || process.env.SMTP_EMAIL;
 const EMAIL_PASS = process.env.EMAIL_PASS || process.env.SMTP_APP_PASSWORD;
+const EMAIL_FROM = process.env.EMAIL_FROM || (EMAIL_USER ? `"CNG Customer Satisfaction Survey" <${EMAIL_USER}>` : undefined);
 const RECEIVER_EMAILS = process.env.RECEIVER_EMAILS || process.env.RECEIVER_EMAIL;
 const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
 const SMTP_RETRY_ATTEMPTS = Number(process.env.SMTP_RETRY_ATTEMPTS || 3);
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_API_URL = process.env.RESEND_API_URL || 'https://api.resend.com';
+const RESEND_TIMEOUT_MS = Number(process.env.RESEND_TIMEOUT_MS || 20000);
+const RESEND_RETRY_ATTEMPTS = Number(process.env.RESEND_RETRY_ATTEMPTS || 3);
 
 const redactEmail = (email) => {
   if (!email || !email.includes('@')) return 'not configured';
@@ -20,6 +28,70 @@ const getSecureForPort = (port) => {
   if (port === 465) return true;
   if (port === 587) return false;
   return process.env.SMTP_SECURE === 'true';
+};
+
+const getRecipients = () => {
+  const recipients = (RECEIVER_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (recipients.length === 0) {
+    throw new Error('Missing recipients. Set RECEIVER_EMAILS in Render environment variables.');
+  }
+
+  return recipients;
+};
+
+const logCommonEmailConfig = () => {
+  console.log(`[EMAIL] Provider: ${EMAIL_PROVIDER}`);
+  console.log(`[EMAIL] EMAIL_FROM: ${EMAIL_FROM || 'missing'}`);
+  console.log(`[EMAIL] RECEIVER_EMAILS: ${RECEIVER_EMAILS ? 'configured' : 'missing'}`);
+};
+
+const validateResendConfig = () => {
+  console.log('[EMAIL] Loading Resend HTTPS email environment variables...');
+  logCommonEmailConfig();
+  console.log(`[EMAIL] RESEND_API_KEY: ${RESEND_API_KEY ? 'configured' : 'missing'}`);
+
+  if (!RESEND_API_KEY) {
+    throw new Error('Missing RESEND_API_KEY. Render cannot reach Gmail SMTP, so configure Resend HTTPS email.');
+  }
+
+  if (!EMAIL_FROM) {
+    throw new Error('Missing EMAIL_FROM. Set it to a verified Resend sender, for example "CNG Survey <survey@yourdomain.com>".');
+  }
+
+  getRecipients();
+};
+
+const validateSmtpConfig = () => {
+  console.log('[EMAIL] Loading Gmail SMTP environment variables...');
+  console.log(`[EMAIL] EMAIL_USER: ${redactEmail(EMAIL_USER)}`);
+  console.log(`[EMAIL] EMAIL_PASS: ${EMAIL_PASS ? 'configured' : 'missing'}`);
+  console.log(`[EMAIL] RECEIVER_EMAILS: ${RECEIVER_EMAILS ? 'configured' : 'missing'}`);
+
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    throw new Error('Missing Gmail credentials. Set EMAIL_USER and EMAIL_PASS in Render environment variables.');
+  }
+
+  const normalizedPass = normalizePassword(EMAIL_PASS);
+  if (normalizedPass.length !== 16) {
+    throw new Error(
+      'EMAIL_PASS must be a 16-character Google App Password, not the normal Gmail account password. Generate it at https://myaccount.google.com/apppasswords.'
+    );
+  }
+
+  getRecipients();
+};
+
+const validateEmailConfig = () => {
+  if (EMAIL_PROVIDER === 'resend') {
+    validateResendConfig();
+    return;
+  }
+
+  validateSmtpConfig();
 };
 
 const getTransportConfig = (port = SMTP_PORT) => ({
@@ -42,57 +114,43 @@ const getTransportConfig = (port = SMTP_PORT) => ({
   logger: process.env.NODE_ENV === 'development',
 });
 
-const validateEmailConfig = () => {
-  console.log('[EMAIL] Loading Gmail SMTP environment variables...');
-  console.log(`[EMAIL] EMAIL_USER: ${redactEmail(EMAIL_USER)}`);
-  console.log(`[EMAIL] EMAIL_PASS: ${EMAIL_PASS ? 'configured' : 'missing'}`);
-  console.log(`[EMAIL] RECEIVER_EMAILS: ${RECEIVER_EMAILS ? 'configured' : 'missing'}`);
-
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    throw new Error('Missing Gmail credentials. Set EMAIL_USER and EMAIL_PASS in Render environment variables.');
-  }
-
-  const normalizedPass = normalizePassword(EMAIL_PASS);
-  if (normalizedPass.length !== 16) {
-    throw new Error(
-      'EMAIL_PASS must be a 16-character Google App Password, not the normal Gmail account password. Generate it at https://myaccount.google.com/apppasswords.'
-    );
-  }
-
-  if (!RECEIVER_EMAILS) {
-    throw new Error('Missing recipients. Set RECEIVER_EMAILS in Render environment variables.');
-  }
-};
-
 const classifyEmailError = (error) => {
   const code = error && (error.code || error.command || error.responseCode);
   const message = error && error.message ? error.message : 'Unknown email error';
+
+  if (error.response && error.config && /resend/i.test(error.config.url || '')) {
+    const status = error.response.status;
+    if (status === 401 || status === 403) return 'Resend rejected the API key or sender authorization. Check RESEND_API_KEY and EMAIL_FROM.';
+    if (status === 422) return 'Resend rejected the email payload. Check EMAIL_FROM, recipients, and attachment size.';
+    if (status >= 500) return 'Resend API returned a temporary server error.';
+    return `Resend API returned HTTP ${status}.`;
+  }
 
   if (code === 'EAUTH' || error.responseCode === 535) {
     return 'Gmail authentication failed. Check EMAIL_USER and confirm EMAIL_PASS is a Google App Password.';
   }
 
   if (code === 'ETIMEDOUT' || code === 'ESOCKET' || /timeout|timed out/i.test(message)) {
-    return 'SMTP connection timed out before Gmail responded. This is a network/port reachability problem between Render and smtp.gmail.com, or the selected SMTP port is blocked/unreachable.';
+    return 'SMTP connection timed out before Gmail responded. Render can resolve smtp.gmail.com but cannot complete TCP connections to Gmail SMTP ports 465 or 587. Use an HTTPS email API provider on Render.';
   }
 
   if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
-    return 'DNS lookup failed for smtp.gmail.com from the backend host.';
+    return 'DNS lookup failed from the backend host.';
   }
 
   if (error.responseCode && error.responseCode >= 500) {
-    return 'Gmail accepted the connection but returned a temporary server-side SMTP error.';
+    return 'The email provider accepted the connection but returned a temporary server-side error.';
   }
 
   if (error.responseCode && error.responseCode >= 400) {
-    return 'Gmail rejected the message or one of the recipients.';
+    return 'The email provider rejected the message or one of the recipients.';
   }
 
-  return 'Email failed for an unclassified SMTP error. See the full stack trace above.';
+  return 'Email failed for an unclassified provider error. See the full stack trace above.';
 };
 
 const createTransporter = (port = SMTP_PORT) => {
-  validateEmailConfig();
+  validateSmtpConfig();
   const config = getTransportConfig(port);
   console.log(
     `[EMAIL] Creating Nodemailer transporter: host=${config.host}, port=${config.port}, secure=${config.secure}, requireTLS=${config.requireTLS}`
@@ -127,6 +185,26 @@ const verifyOnPort = async (port) => {
   }
 };
 
+const verifyResendConnection = async () => {
+  validateResendConfig();
+  console.log('[EMAIL] Verifying Resend HTTPS API reachability...');
+
+  try {
+    await axios.get(`${RESEND_API_URL}/domains`, {
+      timeout: RESEND_TIMEOUT_MS,
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+    });
+    console.log('[EMAIL] Resend HTTPS API is reachable and the API key was accepted.');
+  } catch (error) {
+    console.error(`[EMAIL] Resend verification failed: ${error.message}`);
+    console.error(`[EMAIL] Diagnosis: ${classifyEmailError(error)}`);
+    console.error(error.stack);
+    throw error;
+  }
+};
+
 const getAlternateGmailPort = (port) => {
   if (SMTP_HOST !== 'smtp.gmail.com') return null;
   if (port === 465) return 587;
@@ -134,7 +212,20 @@ const getAlternateGmailPort = (port) => {
   return null;
 };
 
+const isRetryableEmailError = (error) => {
+  const code = error && error.code;
+  if (['ETIMEDOUT', 'ESOCKET', 'ECONNECTION', 'ECONNRESET', 'EAI_AGAIN'].includes(code)) return true;
+  if (error.response && error.response.status >= 500) return true;
+  if (error.responseCode && error.responseCode >= 500) return true;
+  return /timeout|timed out/i.test(error.message || '');
+};
+
 const verifyEmailConnection = async () => {
+  if (EMAIL_PROVIDER === 'resend') {
+    await verifyResendConnection();
+    return;
+  }
+
   console.log('[EMAIL] Starting Gmail SMTP startup verification...');
 
   try {
@@ -153,20 +244,7 @@ const verifyEmailConnection = async () => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const getRecipients = () => {
-  validateEmailConfig();
-  const recipients = RECEIVER_EMAILS.split(',')
-    .map((email) => email.trim())
-    .filter(Boolean);
-
-  if (recipients.length === 0) {
-    throw new Error('RECEIVER_EMAILS did not contain any valid email addresses.');
-  }
-
-  return recipients;
-};
-
-const buildMailOptions = (trackingCode, pdfPath) => {
+const buildEmailContent = (trackingCode, pdfPath) => {
   const recipients = getRecipients();
   const submittedDate = new Date().toLocaleDateString('en-ZA', {
     year: 'numeric',
@@ -179,7 +257,7 @@ const buildMailOptions = (trackingCode, pdfPath) => {
   console.log(`[EMAIL] Preparing message for ${recipients.length} recipient(s). Attachment=${path.basename(pdfPath)}`);
 
   return {
-    from: `"CNG Customer Satisfaction Survey" <${EMAIL_USER}>`,
+    from: EMAIL_FROM,
     to: recipients,
     subject: `New Customer Satisfaction Survey - Tracking Code: ${trackingCode}`,
     html: `
@@ -205,21 +283,68 @@ const buildMailOptions = (trackingCode, pdfPath) => {
         </div>
       </div>
     `,
-    attachments: [
-      {
-        filename: path.basename(pdfPath),
-        path: pdfPath,
-        contentType: 'application/pdf',
-      },
-    ],
+    attachment: {
+      filename: path.basename(pdfPath),
+      path: pdfPath,
+      contentType: 'application/pdf',
+    },
   };
 };
 
-const isRetryableEmailError = (error) => {
-  const code = error && error.code;
-  if (['ETIMEDOUT', 'ESOCKET', 'ECONNECTION', 'ECONNRESET', 'EAI_AGAIN'].includes(code)) return true;
-  if (error.responseCode && error.responseCode >= 500) return true;
-  return /timeout|timed out/i.test(error.message || '');
+const sendViaResend = async (trackingCode, pdfPath) => {
+  validateResendConfig();
+  const emailContent = buildEmailContent(trackingCode, pdfPath);
+  const attachmentContent = await fs.readFile(pdfPath, { encoding: 'base64' });
+  let lastError;
+
+  for (let attempt = 1; attempt <= RESEND_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      console.log(`[EMAIL] Sending email attempt ${attempt}/${RESEND_RETRY_ATTEMPTS} via Resend HTTPS API...`);
+      const response = await axios.post(
+        `${RESEND_API_URL}/emails`,
+        {
+          from: emailContent.from,
+          to: emailContent.to,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          attachments: [
+            {
+              filename: emailContent.attachment.filename,
+              content: attachmentContent,
+            },
+          ],
+        },
+        {
+          timeout: RESEND_TIMEOUT_MS,
+          headers: {
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log(`[EMAIL] Email sent. Resend accepted message id=${response.data && response.data.id ? response.data.id : 'not returned'}`);
+      return response.data;
+    } catch (error) {
+      lastError = error;
+      console.error(`[EMAIL] Resend email failed on attempt ${attempt}/${RESEND_RETRY_ATTEMPTS}: ${error.message}`);
+      console.error(`[EMAIL] Diagnosis: ${classifyEmailError(error)}`);
+      if (error.response && error.response.data) {
+        console.error('[EMAIL] Resend error response:', JSON.stringify(error.response.data));
+      }
+      console.error(error.stack);
+
+      if (!isRetryableEmailError(error) || attempt === RESEND_RETRY_ATTEMPTS) {
+        break;
+      }
+
+      const delayMs = attempt * 2000;
+      console.log(`[EMAIL] Retrying Resend send in ${delayMs}ms...`);
+      await sleep(delayMs);
+    }
+  }
+
+  throw lastError;
 };
 
 const getPortForAttempt = (attempt) => {
@@ -229,8 +354,9 @@ const getPortForAttempt = (attempt) => {
   return SMTP_PORT;
 };
 
-const sendSurveyEmail = async (trackingCode, pdfPath) => {
-  const mailOptions = buildMailOptions(trackingCode, pdfPath);
+const sendViaSmtp = async (trackingCode, pdfPath) => {
+  validateSmtpConfig();
+  const emailContent = buildEmailContent(trackingCode, pdfPath);
   let lastError;
 
   for (let attempt = 1; attempt <= SMTP_RETRY_ATTEMPTS; attempt += 1) {
@@ -243,7 +369,13 @@ const sendSurveyEmail = async (trackingCode, pdfPath) => {
       console.log('[EMAIL] Connecting to Gmail SMTP...');
       transporter = createTransporter(port);
       console.log('[EMAIL] Sending email with PDF attachment...');
-      const info = await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail({
+        from: emailContent.from,
+        to: emailContent.to,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        attachments: [emailContent.attachment],
+      });
       console.log(`[EMAIL] Email sent. Gmail accepted messageId=${info.messageId}`);
       console.log(`[EMAIL] Accepted recipients: ${(info.accepted || []).join(', ') || 'none reported'}`);
       console.log(`[EMAIL] Rejected recipients: ${(info.rejected || []).join(', ') || 'none'}`);
@@ -267,6 +399,14 @@ const sendSurveyEmail = async (trackingCode, pdfPath) => {
   }
 
   throw lastError;
+};
+
+const sendSurveyEmail = async (trackingCode, pdfPath) => {
+  if (EMAIL_PROVIDER === 'resend') {
+    return sendViaResend(trackingCode, pdfPath);
+  }
+
+  return sendViaSmtp(trackingCode, pdfPath);
 };
 
 module.exports = {

@@ -172,7 +172,7 @@ connectDB()
   Port: ${PORT}
   Environment: ${process.env.NODE_ENV || 'development'}
   Database: MongoDB Atlas
-  Email: Gmail SMTP startup verification enabled
+  Email: Provider startup verification enabled
 ========================================
       `);
     });
@@ -183,3 +183,4 @@ connectDB()
   });
 
 module.exports = app;
+
