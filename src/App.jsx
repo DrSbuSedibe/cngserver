@@ -194,11 +194,15 @@ const App = () => {
         }
       };
 
-      const response = await axios.post(`${API_URL}/surveys`, payload);
+      const response = await axios.post(`${API_URL}/surveys`, payload, {
+        validateStatus: (status) => status >= 200 && status < 300,
+      });
 
-      if (response.data.success) {
+      if (response.data?.success === true && response.data?.trackingCode) {
         setTrackingCode(response.data.trackingCode);
         setSubmitted(true);
+      } else {
+        throw new Error(response.data?.message || 'The server did not confirm that the email was sent.');
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -207,7 +211,7 @@ const App = () => {
       } else if (error.request) {
         setSubmitError('Unable to connect to the server. Please check your internet connection and try again.');
       } else {
-        setSubmitError('An unexpected error occurred. Please try again.');
+        setSubmitError(error.message || 'An unexpected error occurred. Please try again.');
       }
     } finally {
       setSubmitting(false);
@@ -265,7 +269,7 @@ const App = () => {
           <div className="tracking-code">{trackingCode}</div>
           <p>Thank you for completing the survey.</p>
           <p style={{ fontSize: '12px', color: '#888', marginTop: '15px' }}>
-            Your responses have been securely submitted. A confirmation email will be sent to the consultant.
+            Your responses have been securely submitted and the PDF email has been accepted by Gmail for delivery.
           </p>
         </div>
       )}
@@ -577,3 +581,4 @@ const App = () => {
 };
 
 export default App;
+
