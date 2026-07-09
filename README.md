@@ -14,3 +14,15 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Render Email Configuration
+
+Render commonly times out on Gmail SMTP ports 465 and 587. This app is configured to use the Resend HTTPS API in production.
+
+Set these environment variables on Render:
+
+- `EMAIL_PROVIDER=resend`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`, using a sender verified in Resend, for example `CNG Survey <survey@yourdomain.com>`
+- `RECEIVER_EMAILS`, comma-separated if there is more than one recipient
+
+Keep `MONGODB_URI`, `PORT`, `NODE_ENV`, and `FRONTEND_URL` configured as usual.

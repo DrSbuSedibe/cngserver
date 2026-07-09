@@ -12,7 +12,7 @@ const connectDB = require('./config/db');
 // Import routes
 const surveyRoutes = require('./routes/surveyRoutes');
 
-// Import email service for SMTP verification on startup
+// Import email service for provider verification on startup
 const { verifyEmailConnection } = require('./services/emailService');
 
 const app = express();
@@ -155,13 +155,13 @@ app.use((err, req, res, next) => {
 
 connectDB()
   .then(() => {
-    // Verify SMTP configuration on startup
+    // Verify email provider configuration on startup
     verifyEmailConnection()
       .then(() => {
-        console.log('✅ SMTP email service verified successfully');
+        console.log('✅ Email service verified successfully');
       })
       .catch((error) => {
-        console.warn('⚠️  SMTP email service verification failed:', error.message);
+        console.warn('⚠️  Email service verification failed:', error.message);
         console.warn('   Survey submissions will fail at the email step.');
       });
 
@@ -183,4 +183,5 @@ connectDB()
   });
 
 module.exports = app;
+
 
