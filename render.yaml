@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cngserver
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: SMTP_SERVICE
+        value: gmail
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_APP_PASSWORD
+        sync: false
+      - key: RECEIVER_EMAILS
+        sync: false
+      - key: FRONTEND_URL
+        value: https://cngsurvey.netlify.app

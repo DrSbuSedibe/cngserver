@@ -39,9 +39,14 @@ const sendSurveyEmail = async (trackingCode, pdfPath) => {
     minute: '2-digit',
   });
 
+  // Support multiple recipients by splitting comma-separated emails
+  const recipients = process.env.RECEIVER_EMAILS
+    ? process.env.RECEIVER_EMAILS.split(',').map(email => email.trim())
+    : process.env.RECEIVER_EMAIL;
+
   const mailOptions = {
     from: process.env.SMTP_EMAIL,
-    to: process.env.RECEIVER_EMAIL,
+    to: recipients,
     subject: `New Customer Satisfaction Survey - Tracking Code: ${trackingCode}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
