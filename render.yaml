@@ -15,14 +15,20 @@ services:
       - key: MONGODB_URI
         sync: false
       - key: EMAIL_PROVIDER
-        value: resend
-      - key: RESEND_API_KEY
+        value: smtp
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: "false"
+      - key: EMAIL_USER
         sync: false
-      - key: EMAIL_FROM
+      - key: EMAIL_PASS
         sync: false
       - key: RECEIVER_EMAILS
         sync: false
-      - key: RESEND_RETRY_ATTEMPTS
+      - key: SMTP_RETRY_ATTEMPTS
         value: 3
       - key: FRONTEND_URL
         value: https://cngsurvey.netlify.app
