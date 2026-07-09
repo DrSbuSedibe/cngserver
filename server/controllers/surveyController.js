@@ -88,16 +88,26 @@ const submitSurvey = async (req, res) => {
     console.log(`Survey saved to MongoDB with tracking code: ${trackingCode}`);
 
     // Step 6: Send email with PDF attachment
+    // The email MUST be delivered successfully before we report success to the
+    // frontend. If it fails, return an HTTP error so the user is not told the
+    // submission succeeded when the consultant never received the PDF.
     try {
       await sendSurveyEmail(trackingCode, pdfPath);
       console.log(`Email sent successfully for tracking code: ${trackingCode}`);
     } catch (emailError) {
-      // Log email error but don't fail the submission
-      // The survey is already saved and PDF generated
       console.error(`Email sending failed for ${trackingCode}:`, emailError.message);
+      console.error(emailError.stack);
+      return res.status(502).json({
+        success: false,
+        trackingCode,
+        message:
+          'Survey was saved but the confirmation email could not be sent. ' +
+          'Please contact support or try submitting again.',
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined,
+      });
     }
 
-    // Step 7: Return success response
+    // Step 7: Return success response (email delivered)
     return res.status(201).json({
       success: true,
       trackingCode,

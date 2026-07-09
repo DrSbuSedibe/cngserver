@@ -12,6 +12,9 @@ const connectDB = require('./config/db');
 // Import routes
 const surveyRoutes = require('./routes/surveyRoutes');
 
+// Import email service for SMTP verification on startup
+const { verifyEmailConfig } = require('./services/emailService');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -152,6 +155,16 @@ app.use((err, req, res, next) => {
 
 connectDB()
   .then(() => {
+    // Verify SMTP configuration on startup
+    verifyEmailConfig()
+      .then(() => {
+        console.log('✅ SMTP email service verified successfully');
+      })
+      .catch((error) => {
+        console.warn('⚠️  SMTP email service verification failed:', error.message);
+        console.warn('   Survey submissions will fail at the email step.');
+      });
+
     app.listen(PORT, () => {
       console.log(`
 ========================================
