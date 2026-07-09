@@ -1,0 +1,15 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd server && npm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "cngserver"
+rootDir = "server"
+
+[services.variables]
+NODE_ENV = "production"
+PORT = "10000"
