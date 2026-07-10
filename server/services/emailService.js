@@ -2,12 +2,10 @@ const fs = require('fs/promises');
 const path = require('path');
 
 const EMAIL_PROVIDER = 'resend';
-const FALLBACK_RESEND_API_KEY = 're_G921W3gc_AiSA3iMLBC3YcAEMddfShTFz';
-const FALLBACK_RECEIVER_EMAILS = 'sbongilesedibe@gmail.com';
-const RECEIVER_EMAILS = process.env.RECEIVER_EMAILS || process.env.RECEIVER_EMAIL || FALLBACK_RECEIVER_EMAILS;
-const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.RESEND_APIKEY || FALLBACK_RESEND_API_KEY;
+const RECEIVER_EMAILS = process.env.RECEIVER_EMAILS || process.env.RECEIVER_EMAIL;
+const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.RESEND_APIKEY;
 const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
-const RESEND_TEST_RECIPIENT = process.env.RESEND_TEST_RECIPIENT || FALLBACK_RECEIVER_EMAILS;
+const RESEND_TEST_RECIPIENT = process.env.RESEND_TEST_RECIPIENT || RECEIVER_EMAILS || '';
 
 const getRecipients = () => {
   const rawRecipients = RECEIVER_EMAILS || '';
