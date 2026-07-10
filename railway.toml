@@ -1,9 +1,4 @@
-[build]
-builder = "nixpacks"
-buildCommand = "cd server && npm install"
-
 [deploy]
-startCommand = "cd server && npm start"
 healthcheckPath = "/api/health"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
