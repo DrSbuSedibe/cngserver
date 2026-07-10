@@ -2,10 +2,13 @@ const fs = require('fs/promises');
 const nodemailer = require('nodemailer');
 const path = require('path');
 
+const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || 'smtp').toLowerCase();
 const EMAIL_USER = process.env.EMAIL_USER || process.env.SMTP_EMAIL;
 const EMAIL_PASS = process.env.EMAIL_PASS || process.env.SMTP_APP_PASSWORD;
 const EMAIL_FROM = process.env.EMAIL_FROM || (EMAIL_USER ? `"CNG Customer Satisfaction Survey" <${EMAIL_USER}>` : undefined);
 const RECEIVER_EMAILS = process.env.RECEIVER_EMAILS || process.env.RECEIVER_EMAIL;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM || EMAIL_FROM || 'onboarding@resend.dev';
 const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
@@ -18,6 +21,8 @@ const redactEmail = (email) => {
 };
 
 const normalizePassword = (password) => (password || '').replace(/\s/g, '');
+
+const isResendProvider = () => EMAIL_PROVIDER === 'resend';
 
 const getSecureForPort = (port) => {
   if (port === 465) return true;
@@ -39,14 +44,21 @@ const getRecipients = () => {
 };
 
 const logEmailConfig = () => {
-  console.log('[EMAIL] Gmail SMTP Configuration:');
-  console.log(`[EMAIL] EMAIL_USER: ${redactEmail(EMAIL_USER)}`);
-  console.log(`[EMAIL] EMAIL_PASS: ${EMAIL_PASS ? 'configured' : 'missing'}`);
-  console.log(`[EMAIL] EMAIL_FROM: ${EMAIL_FROM || 'missing'}`);
+  console.log(`[EMAIL] Provider: ${EMAIL_PROVIDER}`);
+
+  if (isResendProvider()) {
+    console.log(`[EMAIL] RESEND_API_KEY: ${RESEND_API_KEY ? 'configured' : 'missing'}`);
+    console.log(`[EMAIL] RESEND_FROM: ${RESEND_FROM || 'missing'}`);
+  } else {
+    console.log(`[EMAIL] EMAIL_USER: ${redactEmail(EMAIL_USER)}`);
+    console.log(`[EMAIL] EMAIL_PASS: ${EMAIL_PASS ? 'configured' : 'missing'}`);
+    console.log(`[EMAIL] EMAIL_FROM: ${EMAIL_FROM || 'missing'}`);
+    console.log(`[EMAIL] SMTP_HOST: ${SMTP_HOST}`);
+    console.log(`[EMAIL] SMTP_PORT: ${SMTP_PORT}`);
+    console.log(`[EMAIL] SMTP_SECURE: ${SMTP_SECURE}`);
+  }
+
   console.log(`[EMAIL] RECEIVER_EMAILS: ${RECEIVER_EMAILS ? 'configured' : 'missing'}`);
-  console.log(`[EMAIL] SMTP_HOST: ${SMTP_HOST}`);
-  console.log(`[EMAIL] SMTP_PORT: ${SMTP_PORT}`);
-  console.log(`[EMAIL] SMTP_SECURE: ${SMTP_SECURE}`);
 };
 
 const validateSmtpConfig = () => {
@@ -64,6 +76,25 @@ const validateSmtpConfig = () => {
   }
 
   getRecipients();
+};
+
+const validateResendConfig = () => {
+  logEmailConfig();
+
+  if (!RESEND_API_KEY) {
+    throw new Error('Missing Resend API key. Set RESEND_API_KEY in Render environment variables.');
+  }
+
+  getRecipients();
+};
+
+const validateEmailConfig = () => {
+  if (isResendProvider()) {
+    validateResendConfig();
+    return;
+  }
+
+  validateSmtpConfig();
 };
 
 const getTransportConfig = (port = SMTP_PORT) => ({
@@ -89,6 +120,14 @@ const getTransportConfig = (port = SMTP_PORT) => ({
 const classifyEmailError = (error) => {
   const code = error && (error.code || error.command || error.responseCode);
   const message = error && error.message ? error.message : 'Unknown email error';
+
+  if (isResendProvider() && error && error.status === 401) {
+    return 'Resend authentication failed. Check RESEND_API_KEY.';
+  }
+
+  if (isResendProvider() && error && error.status === 422) {
+    return 'Resend rejected the request. Check the sender address and recipients.';
+  }
 
   if (code === 'EAUTH' || error.responseCode === 535) {
     return 'Gmail authentication failed. Check EMAIL_USER and confirm EMAIL_PASS is a Google App Password.';
@@ -118,7 +157,7 @@ const classifyEmailError = (error) => {
 };
 
 const createTransporter = (port = SMTP_PORT) => {
-  validateSmtpConfig();
+  validateEmailConfig();
   const config = getTransportConfig(port);
   console.log(
     `[EMAIL] Creating Nodemailer transporter: host=${config.host}, port=${config.port}, secure=${config.secure}`
@@ -168,6 +207,13 @@ const isRetryableEmailError = (error) => {
 };
 
 const verifyEmailConnection = async () => {
+  if (isResendProvider()) {
+    console.log('[EMAIL] Starting Resend configuration verification...');
+    validateEmailConfig();
+    console.log('[EMAIL] Resend configuration verified successfully.');
+    return true;
+  }
+
   console.log('[EMAIL] Starting Gmail SMTP startup verification...');
 
   try {
@@ -203,7 +249,7 @@ const buildEmailContent = (trackingCode, pdfPath) => {
   console.log(`[EMAIL] Preparing message for ${recipients.length} recipient(s). Attachment=${path.basename(pdfPath)}`);
 
   return {
-    from: EMAIL_FROM,
+    from: isResendProvider() ? RESEND_FROM : EMAIL_FROM,
     to: recipients,
     subject: `New Customer Satisfaction Survey - Tracking Code: ${trackingCode}`,
     html: `
@@ -229,7 +275,7 @@ const buildEmailContent = (trackingCode, pdfPath) => {
         </div>
       </div>
     `,
-    attachment: {
+    smtpAttachment: {
       filename: path.basename(pdfPath),
       path: pdfPath,
       contentType: 'application/pdf',
@@ -237,12 +283,49 @@ const buildEmailContent = (trackingCode, pdfPath) => {
   };
 };
 
+const sendViaResend = async (trackingCode, pdfPath) => {
+  const emailContent = buildEmailContent(trackingCode, pdfPath);
+  const pdfBuffer = await fs.readFile(pdfPath);
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: emailContent.from,
+      to: emailContent.to,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      attachments: [
+        {
+          filename: path.basename(pdfPath),
+          content: pdfBuffer.toString('base64'),
+          contentType: 'application/pdf',
+        },
+      ],
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(data.message || `Resend request failed with status ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  console.log(`[EMAIL] Resend email sent successfully. Id=${data.id}`);
+  return data;
+};
+
 const sendViaSmtp = async (trackingCode, pdfPath) => {
   const emailContent = buildEmailContent(trackingCode, pdfPath);
   let lastError;
 
   for (let attempt = 1; attempt <= SMTP_RETRY_ATTEMPTS; attempt += 1) {
-    const port = getPortForAttempt(attempt);
+    const port = SMTP_PORT;
     let transporter;
 
     try {
@@ -255,7 +338,7 @@ const sendViaSmtp = async (trackingCode, pdfPath) => {
         to: emailContent.to,
         subject: emailContent.subject,
         html: emailContent.html,
-        attachments: [emailContent.attachment],
+        attachments: [emailContent.smtpAttachment],
       });
       console.log(`[EMAIL] Email sent successfully. MessageId=${info.messageId}`);
       console.log(`[EMAIL] Accepted: ${(info.accepted || []).join(', ')}`);
@@ -283,6 +366,10 @@ const sendViaSmtp = async (trackingCode, pdfPath) => {
 };
 
 const sendSurveyEmail = async (trackingCode, pdfPath) => {
+  if (isResendProvider()) {
+    return sendViaResend(trackingCode, pdfPath);
+  }
+
   return sendViaSmtp(trackingCode, pdfPath);
 };
 
