@@ -200,6 +200,9 @@ const App = () => {
 
       if (response.data?.success === true && response.data?.trackingCode) {
         setTrackingCode(response.data.trackingCode);
+        if (response.data?.emailSent === false) {
+          setSubmitError(response.data?.emailMessage || 'The survey was saved, but the email notification could not be delivered.');
+        }
         setSubmitted(true);
       } else {
         throw new Error(response.data?.message || 'The server did not confirm that the email was sent.');

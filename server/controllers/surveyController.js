@@ -88,16 +88,18 @@ const submitSurvey = async (req, res) => {
     console.log(`Survey saved to MongoDB with tracking code: ${trackingCode}`);
 
     // Step 6: Send email with PDF attachment (non-blocking)
-    // Email failures are logged but don't prevent survey submission
-    // This is important for platforms like Railway that block SMTP
+    let emailSent = true;
+    let emailMessage = 'Email notification sent successfully';
+
     try {
       await sendSurveyEmail(trackingCode, pdfPath);
       console.log(`Email sent successfully for tracking code: ${trackingCode}`);
     } catch (emailError) {
+      emailSent = false;
+      emailMessage = emailError.message || 'Email notification failed';
       console.error(`Email sending failed for ${trackingCode}:`, emailError.message);
       console.error(emailError.stack);
       console.warn(`Survey ${trackingCode} was saved but email notification failed. The survey data is still in the database.`);
-      // Don't fail the submission - the survey is saved successfully
     }
 
     // Step 7: Return success response
@@ -105,6 +107,8 @@ const submitSurvey = async (req, res) => {
       success: true,
       trackingCode,
       message: 'Survey submitted successfully',
+      emailSent,
+      emailMessage,
     });
   } catch (error) {
     console.error('Survey submission error:', error);
