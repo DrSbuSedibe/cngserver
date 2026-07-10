@@ -15,7 +15,7 @@ const getRecipients = () => {
     .filter(Boolean);
 
   if (recipients.length === 0) {
-    return [RESEND_TEST_RECIPIENT];
+    throw new Error('Missing recipient email. Set RECEIVER_EMAILS in the server environment.');
   }
 
   return recipients;
