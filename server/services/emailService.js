@@ -126,7 +126,7 @@ const classifyEmailError = (error) => {
   }
 
   if (isResendProvider() && error && error.status === 422) {
-    return 'Resend rejected the request. Check the sender address and recipients.';
+    return 'Resend rejected the request. Verify your domain in Resend and use a sender email from that verified domain.';
   }
 
   if (code === 'EAUTH' || error.responseCode === 535) {
@@ -320,6 +320,16 @@ const sendViaResend = async (trackingCode, pdfPath) => {
   return data;
 };
 
+const sendWithFallback = async (trackingCode, pdfPath) => {
+  try {
+    return await sendViaResend(trackingCode, pdfPath);
+  } catch (error) {
+    console.warn(`[EMAIL] Resend failed: ${error.message}`);
+    console.warn('[EMAIL] Falling back to Gmail SMTP.');
+    return sendViaSmtp(trackingCode, pdfPath);
+  }
+};
+
 const sendViaSmtp = async (trackingCode, pdfPath) => {
   const emailContent = buildEmailContent(trackingCode, pdfPath);
   let lastError;
@@ -367,7 +377,7 @@ const sendViaSmtp = async (trackingCode, pdfPath) => {
 
 const sendSurveyEmail = async (trackingCode, pdfPath) => {
   if (isResendProvider()) {
-    return sendViaResend(trackingCode, pdfPath);
+    return sendWithFallback(trackingCode, pdfPath);
   }
 
   return sendViaSmtp(trackingCode, pdfPath);
