@@ -11,3 +11,4 @@ restartPolicyMaxRetries = 10
 [env]
 NODE_ENV = "production"
 PORT = "10000"
+RAILWAY_ENVIRONMENT = "production"
