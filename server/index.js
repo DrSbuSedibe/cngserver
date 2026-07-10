@@ -156,20 +156,25 @@ app.use((err, req, res, next) => {
 // DATABASE & SERVER START
 // =====================
 
-connectDB()
-  .then(() => {
-    // Verify email provider configuration on startup
-    verifyEmailConnection()
-      .then(() => {
-        console.log('✅ Email service verified successfully');
-      })
-      .catch((error) => {
-        console.warn('⚠️  Email service verification failed:', error.message);
-        console.warn('   Survey submissions will fail at the email step.');
-      });
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log('✅ MongoDB connected successfully');
+  } catch (error) {
+    console.warn('⚠️  MongoDB connection failed during startup:', error.message);
+    console.warn('   The API health endpoint will still be available, but survey submissions may fail until the database is reachable.');
+  }
 
-    app.listen(PORT, () => {
-      console.log(`
+  try {
+    await verifyEmailConnection();
+    console.log('✅ Email service verified successfully');
+  } catch (error) {
+    console.warn('⚠️  Email service verification failed:', error.message);
+    console.warn('   Survey submissions may fail at the email step.');
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`
 ========================================
   CNG Survey Server
   Port: ${PORT}
@@ -177,13 +182,11 @@ connectDB()
   Database: MongoDB Atlas
   Email: Provider startup verification enabled
 ========================================
-      `);
-    });
-  })
-  .catch((error) => {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+    `);
   });
+};
+
+startServer();
 
 module.exports = app;
 

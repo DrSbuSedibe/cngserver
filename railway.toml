@@ -1,14 +1,13 @@
 [build]
-builder = "dockerfile"
+builder = "nixpacks"
+buildCommand = "npm install --prefix server"
 
 [deploy]
+startCommand = "npm start --prefix server"
+healthcheckPath = "/api/health"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
-[[services]]
-name = "cngserver"
-rootDir = "server"
-
-[services.variables]
+[env]
 NODE_ENV = "production"
 PORT = "10000"
