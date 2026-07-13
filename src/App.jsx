@@ -386,7 +386,7 @@ const App = () => {
                     <thead>
                       <tr>
                         <th style={{ textAlign: 'left', width: '280px' }}>COMPETITOR / PEER ORGANISATION NAME</th>
-                        <th style={{ textAlign: 'left' }}>YOUR RANKING OF THIS</th>
+                        <th style={{ textAlign: 'left' }}>YOUR RANKING OF THIS ORGANISATION</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -406,7 +406,7 @@ const App = () => {
                             <input
                               type="text"
                               className="cng-input"
-                              placeholder="Enter competitor name"
+                              placeholder="Enter Your Ranking"
                               value={comp.name}
                               onChange={(e) => handleCompetitorChange(idx, 'name', e.target.value)}
                             />
@@ -560,7 +560,7 @@ const App = () => {
                   <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>7</div>
                   <div>
                     <div className="cng-card-title">Contact Information</div>
-                    <div className="cng-card-subtitle">For Tracking Purposes Only</div>
+                    <div className="cng-card-subtitle" style={{ fontWeight: 800, color: '#b30015', fontSize: '0.9rem' }}>FOR TRACKING PURPOSES ONLY</div>
                   </div>
                 </div>
                 <div className="cng-contact-box">
