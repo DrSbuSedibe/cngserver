@@ -231,7 +231,7 @@ const App = () => {
           <tr>
             <th style={{ width: '30px', fontSize: '0.65rem' }}>#</th>
             <th style={{ textAlign: 'left', fontSize: '0.65rem' }}>EVALUATION CRITERIA</th>
-            <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>ACTUAL PERFORMANCE FROM (CNG)</th>
+            <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>ACTUAL PERFORMANCE FROM CNG</th>
             <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>EXPECTED PERFORMANCE</th>
             <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>BEST COMPETITOR'S PERFORMANCE</th>
             <th style={{ minWidth: '90px', fontSize: '0.65rem' }}>IMPORTANCE LEVEL</th>
