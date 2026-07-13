@@ -590,11 +590,21 @@ select.cng-input {
   letter-spacing: 0.5px;
   padding: 12px 10px;
   text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cng-comp-table th:last-child {
+  border-right: none;
 }
 
 .cng-comp-table td {
   padding: 8px 6px;
   border-bottom: 1px solid var(--cng-border-light);
+  border-right: 1px solid var(--cng-border-light);
+}
+
+.cng-comp-table td:last-child {
+  border-right: none;
 }
 
 .cng-comp-table tr:last-child td {
