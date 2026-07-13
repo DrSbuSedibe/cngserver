@@ -46,7 +46,6 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // CNG Brand Colors
       const GREEN = '#16B44B';
-      const GREEN_DARK = '#0d8a3a';
       const ORANGE = '#F68B11';
       const DARK = '#222222';
       const GRAY = '#6c757d';
@@ -92,10 +91,9 @@ const generatePDF = async (surveyData, trackingCode) => {
         doc.restore();
       };
 
-      // Minimal header for pages 2+ - CNG branded
+      // Minimal header for pages 2+
       const addMinimalHeader = () => {
         doc.save();
-        // Green header bar (shorter)
         doc.rect(30, 12, doc.page.width - 60, 20).fill(GREEN);
         
         doc.fillColor(WHITE)
@@ -107,44 +105,26 @@ const generatePDF = async (surveyData, trackingCode) => {
           .fontSize(6)
           .text(`Tracking: ${trackingCode}`, doc.page.width - 175, 17, { width: 135, align: 'right' });
         
-        // Orange accent line
         doc.fillColor(ORANGE);
         doc.rect(30, 32, doc.page.width - 60, 1.5).fill(ORANGE);
         
         doc.restore();
       };
 
-      // ===== FOOTER HELPER =====
-      const addFooter = (pageNum, totalPages, isLastPage) => {
-        doc.save();
-        doc.fillColor(GRAY)
-          .fontSize(6)
-          .font('Helvetica');
-        
-        // Page number
-        doc.text(`Page ${pageNum} of ${totalPages}`, 30, doc.page.height - 20, { width: doc.page.width - 60, align: 'center' });
-        
-        // CNG copyright
-        doc.text('© CNG Holdings', 30, doc.page.height - 14, { width: doc.page.width - 60, align: 'center' });
-        
-        doc.restore();
-      };
+      // Empty footer — no page numbers or copyright text
+      const addFooter = () => {};
 
       // ===== PAGE BREAK HELPER =====
       const addPageIfNeeded = () => {
         if (yPos > 100) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
           return true;
         }
         return false;
       };
-
-      // Track pages
-      let pageNum = 1;
 
       // ===== PAGE 1: HEADER + INTRO + SECTION 1 (Items 1-15) =====
       addFullHeader();
@@ -194,9 +174,8 @@ const generatePDF = async (surveyData, trackingCode) => {
       // Draw criteria rows (1-15)
       criteriaRows.slice(0, 15).forEach((row, idx) => {
         if (yPos + rowHeight + 3 > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
 
@@ -257,9 +236,8 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       criteriaRows.slice(15, 30).forEach((row, idx) => {
         if (yPos + rowHeight + 3 > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
 
@@ -315,9 +293,8 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       criteriaRows.slice(30, 40).forEach((row, idx) => {
         if (yPos + rowHeight + 3 > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
 
@@ -369,9 +346,8 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Competitor table header
       if (yPos + 14 * (competitors.length + 1) > doc.page.height - 35) {
-        addFooter(pageNum, 5, false);
+        addFooter();
         doc.addPage();
-        pageNum++;
         addMinimalHeader();
         yPos = 45;
       }
@@ -385,9 +361,8 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       competitors.forEach((comp, idx) => {
         if (yPos + 13 > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
         }
@@ -415,14 +390,12 @@ const generatePDF = async (surveyData, trackingCode) => {
       // Question printer
       const printQuestion = (question, answer, otherField, qNum) => {
         if (yPos + 35 > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
         }
 
-        // Green bullet for question number
         doc.fillColor(GREEN)
           .fontSize(6)
           .font('Helvetica-Bold')
@@ -434,7 +407,6 @@ const generatePDF = async (surveyData, trackingCode) => {
         
         doc.font('Helvetica').fontSize(7);
         
-        // Answer with light green background
         const answerText = answer || 'Not specified';
         doc.rect(40, yPos - 1, doc.page.width - 70, 10).fill('#f0faf3');
         doc.fillColor(DARK)
@@ -470,9 +442,8 @@ const generatePDF = async (surveyData, trackingCode) => {
         const estSpace = 14 + (estLines * 8) + (otherAnswer ? 8 : 0) + 6;
 
         if (yPos + estSpace > doc.page.height - 35) {
-          addFooter(pageNum, 5, false);
+          addFooter();
           doc.addPage();
-          pageNum++;
           addMinimalHeader();
           yPos = 45;
         }
@@ -488,7 +459,6 @@ const generatePDF = async (surveyData, trackingCode) => {
         
         doc.font('Helvetica').fontSize(6);
         
-        // Answer with light green bg
         const answerHeight = doc.heightOfString(`Answer: ${answerText}`, { width: doc.page.width - 78 });
         doc.rect(40, yPos - 1, doc.page.width - 70, Math.max(10, answerHeight + 3)).fill('#f0faf3');
         doc.fillColor(DARK)
@@ -514,9 +484,8 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Question 6
       if (yPos + 30 > doc.page.height - 35) {
-        addFooter(pageNum, 5, false);
+        addFooter();
         doc.addPage();
-        pageNum++;
         addMinimalHeader();
         yPos = 45;
       }
@@ -533,7 +502,6 @@ const generatePDF = async (surveyData, trackingCode) => {
       
       doc.font('Helvetica').fontSize(7);
       
-      // Score with green bg
       const scoreText = `Score (1-10): ${formData.recommendScore || 'Not specified'}`;
       doc.rect(40, yPos - 1, doc.page.width - 70, 10).fill('#f0faf3');
       doc.fillColor(DARK)
@@ -549,16 +517,14 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Business Name & Email
       if (yPos + 30 > doc.page.height - 35) {
-        addFooter(pageNum, 5, false);
+        addFooter();
         doc.addPage();
-        pageNum++;
         addMinimalHeader();
         yPos = 45;
       }
 
       yPos += 3;
       
-      // Contact info box
       doc.rect(30, yPos, doc.page.width - 60, 25).fill('#f0faf3');
       doc.rect(30, yPos, doc.page.width - 60, 25).lineWidth(1).stroke(GREEN);
       
@@ -571,10 +537,8 @@ const generatePDF = async (surveyData, trackingCode) => {
       
       yPos += 30;
 
-      // Closing line with green
       yPos = Math.max(yPos + 10, doc.page.height - 65);
       
-      // Green/orange gradient divider
       doc.rect(30, yPos, doc.page.width - 60, 3).fill(GREEN);
       doc.rect(30, yPos, (doc.page.width - 60) / 2, 3).fill(ORANGE);
       
@@ -589,10 +553,8 @@ const generatePDF = async (surveyData, trackingCode) => {
         .font('Helvetica')
         .text('Responses secured & protected with total data anonymity by Rob Daniel Associates', 30, yPos, { width: doc.page.width - 60, align: 'center' });
 
-      // Last page footer
-      addFooter(pageNum, 5, true);
+      addFooter();
 
-      // Finalize PDF
       doc.end();
 
       writeStream.on('finish', () => {
