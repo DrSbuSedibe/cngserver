@@ -4,6 +4,7 @@ const path = require('path');
 
 /**
  * Generate a professional PDF for the survey submission using PDFKit.
+ * Uses CNG Holdings brand identity (Green #16B44B, Orange #F68B11).
  * 
  * @param {Object} surveyData - The complete survey data
  * @param {string} trackingCode - The unique tracking code
@@ -43,65 +44,100 @@ const generatePDF = async (surveyData, trackingCode) => {
       const writeStream = fs.createWriteStream(filePath);
       doc.pipe(writeStream);
 
-      // Colors
-      const RED = '#b30015';
-      const DARK = '#111111';
-      const GRAY = '#666666';
+      // CNG Brand Colors
+      const GREEN = '#16B44B';
+      const GREEN_DARK = '#0d8a3a';
+      const ORANGE = '#F68B11';
+      const DARK = '#222222';
+      const GRAY = '#6c757d';
+      const LIGHT_BG = '#F8F9FA';
+      const WHITE = '#FFFFFF';
 
       // ===== HEADER HELPERS =====
       
-      // Full header for page 1 only
+      // Full header for page 1 only - CNG branded
       const addFullHeader = () => {
         doc.save();
-        doc.rect(30, 12, doc.page.width - 60, 30).fill(RED);
-        doc.fillColor('#ffffff')
-          .fontSize(7)
-          .font('Helvetica-Bold')
-          .text('CUSTOMER SATISFACTION INDEX SURVEY 2026', 40, 18, { width: 300 });
-        doc.fontSize(12)
-          .text('CNG HOLDINGS', 40, 27, { width: 300 });
+        // Green header bar
+        doc.rect(30, 12, doc.page.width - 60, 38).fill(GREEN);
         
-        doc.fontSize(6)
+        // Company name
+        doc.fillColor(WHITE)
+          .fontSize(14)
+          .font('Helvetica-Bold')
+          .text('CNG HOLDINGS', 40, 16, { width: 300 });
+        
+        doc.fontSize(7)
           .font('Helvetica')
-          .text(`Tracking: ${trackingCode}`, doc.page.width - 170, 18, { width: 130, align: 'right' });
-        doc.text(`Date: ${submittedDate}`, doc.page.width - 170, 25, { width: 130, align: 'right' });
-
-        doc.fillColor('#856404');
+          .text('CUSTOMER SATISFACTION INDEX SURVEY 2026', 40, 33, { width: 300 });
+        
+        // Right side info
+        doc.fontSize(6.5)
+          .font('Helvetica-Bold')
+          .text(`Tracking: ${trackingCode}`, doc.page.width - 175, 18, { width: 135, align: 'right' });
+        doc.font('Helvetica')
+          .fontSize(6)
+          .text(`Date: ${submittedDate}`, doc.page.width - 175, 26, { width: 135, align: 'right' });
+        
+        // Confidential badge with orange
+        doc.fillColor(ORANGE);
         doc.fontSize(6)
           .font('Helvetica-Bold')
-          .text('Strictly Confidential', doc.page.width - 170, 32, { width: 130, align: 'right' });
+          .text('Strictly Confidential', doc.page.width - 175, 34, { width: 135, align: 'right' });
+        
+        // Orange accent line under header
+        doc.fillColor(ORANGE);
+        doc.rect(30, 50, doc.page.width - 60, 2).fill(ORANGE);
         
         doc.restore();
       };
 
-      // Minimal header for pages 2+
+      // Minimal header for pages 2+ - CNG branded
       const addMinimalHeader = () => {
         doc.save();
-        doc.rect(30, 12, doc.page.width - 60, 18).fill(RED);
-        doc.fillColor('#ffffff')
-          .fontSize(6)
+        // Green header bar (shorter)
+        doc.rect(30, 12, doc.page.width - 60, 20).fill(GREEN);
+        
+        doc.fillColor(WHITE)
+          .fontSize(7)
           .font('Helvetica-Bold')
-          .text('CUSTOMER SATISFACTION INDEX SURVEY 2026', 40, 16, { width: 300 });
-        doc.fontSize(6)
-          .font('Helvetica')
-          .text(`Tracking: ${trackingCode}`, doc.page.width - 170, 16, { width: 130, align: 'right' });
+          .text('CNG HOLDINGS | Customer Satisfaction Survey 2026', 40, 17, { width: 300 });
+        
+        doc.font('Helvetica')
+          .fontSize(6)
+          .text(`Tracking: ${trackingCode}`, doc.page.width - 175, 17, { width: 135, align: 'right' });
+        
+        // Orange accent line
+        doc.fillColor(ORANGE);
+        doc.rect(30, 32, doc.page.width - 60, 1.5).fill(ORANGE);
+        
         doc.restore();
       };
 
       // ===== FOOTER HELPER =====
       const addFooter = (pageNum, totalPages, isLastPage) => {
-        // Footer is intentionally empty - no page numbers or branding
+        doc.save();
+        doc.fillColor(GRAY)
+          .fontSize(6)
+          .font('Helvetica');
+        
+        // Page number
+        doc.text(`Page ${pageNum} of ${totalPages}`, 30, doc.page.height - 20, { width: doc.page.width - 60, align: 'center' });
+        
+        // CNG copyright
+        doc.text('© CNG Holdings', 30, doc.page.height - 14, { width: doc.page.width - 60, align: 'center' });
+        
+        doc.restore();
       };
 
       // ===== PAGE BREAK HELPER =====
-      // Adds a new page only if we're past the top area (has actual content)
       const addPageIfNeeded = () => {
         if (yPos > 100) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
           return true;
         }
         return false;
@@ -113,23 +149,23 @@ const generatePDF = async (surveyData, trackingCode) => {
       // ===== PAGE 1: HEADER + INTRO + SECTION 1 (Items 1-15) =====
       addFullHeader();
 
-      // Intro box
-      doc.rect(30, 48, doc.page.width - 60, 35).fill('#fdf3f4');
+      // Intro box - light green background
+      doc.rect(30, 56, doc.page.width - 60, 38).fill('#f0faf3');
       doc.fillColor(DARK)
         .fontSize(6.5)
         .font('Helvetica')
-        .text('This survey is to provide CNG Holdings (Pty) Ltd (CNG) with a picture of how it rates as an organisation. It has 4 sections and completion should take 20 minutes. Please be objective.', 40, 51, { width: doc.page.width - 80 });
-      doc.text('Your responses will be anonymous and kept confidential by Rob Daniel Associates (Pty) Ltd, the consultancy conducting this survey.', 40, 62, { width: doc.page.width - 80 });
-      doc.text('Consolidated survey results will enable CNG to identify what it does well and areas requiring improvement.', 40, 72, { width: doc.page.width - 80 });
+        .text('This survey is to provide CNG Holdings (Pty) Ltd (CNG) with a picture of how it rates as an organisation. It has 4 sections and completion should take 20 minutes. Please be objective.', 40, 59, { width: doc.page.width - 80 });
+      doc.text('Your responses will be anonymous and kept confidential by Rob Daniel Associates (Pty) Ltd, the consultancy conducting this survey.', 40, 71, { width: doc.page.width - 80 });
+      doc.text('Consolidated survey results will enable CNG to identify what it does well and areas requiring improvement.', 40, 83, { width: doc.page.width - 80 });
 
       // Section 1 title
-      let yPos = 92;
-      doc.fillColor(RED)
+      let yPos = 102;
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 1 OF 4: THE PERFORMANCE & IMPORTANCE MATRIX (Items 1 - 15)', 30, yPos);
       
-      yPos += 10;
+      yPos += 11;
       doc.fillColor(GRAY)
         .fontSize(6)
         .font('Helvetica')
@@ -141,9 +177,9 @@ const generatePDF = async (surveyData, trackingCode) => {
       const colHeaders = ['#', 'EVALUATION CRITERIA', 'ACTUAL (CNG)', 'EXPECTED', 'BEST COMPETITOR', 'IMPORTANCE'];
       const rowHeight = 13;
 
-      // Draw table header
+      // Draw table header - dark background
       doc.rect(30, yPos, doc.page.width - 60, 13).fill(DARK);
-      doc.fillColor('#ffffff')
+      doc.fillColor(WHITE)
         .fontSize(6)
         .font('Helvetica-Bold');
       
@@ -157,16 +193,16 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Draw criteria rows (1-15)
       criteriaRows.slice(0, 15).forEach((row, idx) => {
-        if (yPos + rowHeight + 3 > doc.page.height - 25) {
+        if (yPos + rowHeight + 3 > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
 
           // Redraw header row
           doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-          doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+          doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
           let hx = 32;
           colHeaders.forEach((header, hidx) => {
             doc.text(header, hx, yPos + 3, { width: colWidths[hidx], align: hidx === 0 ? 'center' : hidx === 1 ? 'left' : 'center' });
@@ -176,7 +212,7 @@ const generatePDF = async (surveyData, trackingCode) => {
         }
 
         if (idx % 2 === 0) {
-          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill('#f9f9f9');
+          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill(LIGHT_BG);
         }
 
         doc.fillColor(DARK)
@@ -199,10 +235,10 @@ const generatePDF = async (surveyData, trackingCode) => {
         yPos += rowHeight;
       });
 
-      // ===== SECTION 1 (Items 16-30) - continues on same or new page =====
+      // ===== SECTION 1 (Items 16-30) =====
       addPageIfNeeded();
 
-      doc.fillColor(RED)
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 1 OF 4: THE PERFORMANCE & IMPORTANCE MATRIX (Items 16 - 30)', 30, yPos);
@@ -211,7 +247,7 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Redraw table header
       doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-      doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+      doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
       let hx2 = 32;
       colHeaders.forEach((header, hidx) => {
         doc.text(header, hx2, yPos + 3, { width: colWidths[hidx], align: hidx === 0 ? 'center' : hidx === 1 ? 'left' : 'center' });
@@ -220,15 +256,15 @@ const generatePDF = async (surveyData, trackingCode) => {
       yPos += 12;
 
       criteriaRows.slice(15, 30).forEach((row, idx) => {
-        if (yPos + rowHeight + 3 > doc.page.height - 25) {
+        if (yPos + rowHeight + 3 > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
 
           doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-          doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+          doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
           let hx3 = 32;
           colHeaders.forEach((header, hidx3) => {
             doc.text(header, hx3, yPos + 3, { width: colWidths[hidx3], align: hidx3 === 0 ? 'center' : hidx3 === 1 ? 'left' : 'center' });
@@ -238,7 +274,7 @@ const generatePDF = async (surveyData, trackingCode) => {
         }
 
         if (idx % 2 === 0) {
-          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill('#f9f9f9');
+          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill(LIGHT_BG);
         }
 
         doc.fillColor(DARK).fontSize(6).font('Helvetica');
@@ -261,7 +297,7 @@ const generatePDF = async (surveyData, trackingCode) => {
       // ===== SECTION 1 (Items 31-40) + SECTION 2 =====
       addPageIfNeeded();
 
-      doc.fillColor(RED)
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 1 OF 4: THE PERFORMANCE & IMPORTANCE MATRIX (Items 31 - 40)', 30, yPos);
@@ -269,7 +305,7 @@ const generatePDF = async (surveyData, trackingCode) => {
       yPos += 10;
 
       doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-      doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+      doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
       let hx4 = 32;
       colHeaders.forEach((header, hidx4) => {
         doc.text(header, hx4, yPos + 3, { width: colWidths[hidx4], align: hidx4 === 0 ? 'center' : hidx4 === 1 ? 'left' : 'center' });
@@ -278,15 +314,15 @@ const generatePDF = async (surveyData, trackingCode) => {
       yPos += 12;
 
       criteriaRows.slice(30, 40).forEach((row, idx) => {
-        if (yPos + rowHeight + 3 > doc.page.height - 25) {
+        if (yPos + rowHeight + 3 > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
 
           doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-          doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+          doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
           let hx5 = 32;
           colHeaders.forEach((header, hidx5) => {
             doc.text(header, hx5, yPos + 3, { width: colWidths[hidx5], align: hidx5 === 0 ? 'center' : hidx5 === 1 ? 'left' : 'center' });
@@ -296,7 +332,7 @@ const generatePDF = async (surveyData, trackingCode) => {
         }
 
         if (idx % 2 === 0) {
-          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill('#f9f9f9');
+          doc.rect(30, yPos, doc.page.width - 60, rowHeight).fill(LIGHT_BG);
         }
 
         doc.fillColor(DARK).fontSize(6).font('Helvetica');
@@ -318,7 +354,7 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Section 2: Competitive Landscape
       yPos += 8;
-      doc.fillColor(RED)
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 2 OF 4: COMPETITIVE LANDSCAPE', 30, yPos);
@@ -332,40 +368,44 @@ const generatePDF = async (surveyData, trackingCode) => {
       yPos += 9;
 
       // Competitor table header
-      if (yPos + 14 * (competitors.length + 1) > doc.page.height - 25) {
+      if (yPos + 14 * (competitors.length + 1) > doc.page.height - 35) {
         addFooter(pageNum, 5, false);
         doc.addPage();
         pageNum++;
         addMinimalHeader();
-        yPos = 40;
+        yPos = 45;
       }
 
       doc.rect(30, yPos, doc.page.width - 60, 12).fill(DARK);
-      doc.fillColor('#ffffff').fontSize(6).font('Helvetica-Bold');
+      doc.fillColor(WHITE).fontSize(6).font('Helvetica-Bold');
       doc.text('COMPETITOR / PEER ORGANISATION NAME', 32, yPos + 3, { width: 280 });
       doc.text('YOUR RANKING OF THIS', 312, yPos + 3, { width: 100 });
 
       yPos += 12;
 
       competitors.forEach((comp, idx) => {
-        if (yPos + 13 > doc.page.height - 25) {
+        if (yPos + 13 > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
+        }
+
+        if (idx % 2 === 0) {
+          doc.rect(30, yPos, doc.page.width - 60, 11).fill(LIGHT_BG);
         }
 
         doc.fillColor(DARK).fontSize(6).font('Helvetica');
         doc.text(comp.name || '-', 32, yPos + 2, { width: 280 });
         doc.text(comp.rank || '-', 312, yPos + 2, { width: 100, align: 'center' });
-        yPos += 12;
+        yPos += 11;
       });
 
       // ===== SECTION 3 =====
       addPageIfNeeded();
 
-      doc.fillColor(RED)
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 3 OF 4: GENERAL CONFIGURATION QUESTIONS', 30, yPos);
@@ -374,25 +414,35 @@ const generatePDF = async (surveyData, trackingCode) => {
 
       // Question printer
       const printQuestion = (question, answer, otherField, qNum) => {
-        if (yPos + 35 > doc.page.height - 25) {
+        if (yPos + 35 > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
         }
 
+        // Green bullet for question number
+        doc.fillColor(GREEN)
+          .fontSize(6)
+          .font('Helvetica-Bold')
+          .text(`${qNum}.`, 30, yPos + 1);
+        
         doc.fillColor(DARK).fontSize(7).font('Helvetica-Bold');
-        doc.text(`${qNum}. ${question}`, 30, yPos);
-        yPos += 11;
+        doc.text(`${question}`, 38, yPos, { width: doc.page.width - 70 });
+        yPos += 12;
+        
         doc.font('Helvetica').fontSize(7);
         
+        // Answer with light green background
         const answerText = answer || 'Not specified';
-        doc.text(`Answer: ${answerText}`, 40, yPos);
-        yPos += 10;
+        doc.rect(40, yPos - 1, doc.page.width - 70, 10).fill('#f0faf3');
+        doc.fillColor(DARK)
+          .text(`Answer: ${answerText}`, 44, yPos, { width: doc.page.width - 78 });
+        yPos += 12;
 
         if (otherField) {
-          doc.text(`Other: ${otherField}`, 40, yPos);
+          doc.fillColor(GRAY).text(`Other: ${otherField}`, 44, yPos, { width: doc.page.width - 78 });
           yPos += 10;
         }
 
@@ -406,7 +456,7 @@ const generatePDF = async (surveyData, trackingCode) => {
       // ===== SECTION 4 =====
       addPageIfNeeded();
 
-      doc.fillColor(RED)
+      doc.fillColor(GREEN)
         .fontSize(8)
         .font('Helvetica-Bold')
         .text('SECTION 4 OF 4: STRATEGIC INSIGHTS & FEEDBACK', 30, yPos);
@@ -419,26 +469,36 @@ const generatePDF = async (surveyData, trackingCode) => {
         const estLines = Math.ceil(answerText.length / 85);
         const estSpace = 14 + (estLines * 8) + (otherAnswer ? 8 : 0) + 6;
 
-        if (yPos + estSpace > doc.page.height - 30) {
+        if (yPos + estSpace > doc.page.height - 35) {
           addFooter(pageNum, 5, false);
           doc.addPage();
           pageNum++;
           addMinimalHeader();
-          yPos = 40;
+          yPos = 45;
         }
 
+        doc.fillColor(GREEN)
+          .fontSize(6)
+          .font('Helvetica-Bold')
+          .text(`${qNum}.`, 30, yPos + 1);
+        
         doc.fillColor(DARK).fontSize(7).font('Helvetica-Bold');
-        doc.text(`${qNum}. ${question}`, 30, yPos);
-        yPos += 11;
+        doc.text(`${question}`, 38, yPos, { width: doc.page.width - 70 });
+        yPos += 12;
         
         doc.font('Helvetica').fontSize(6);
-        doc.text(`Answer: ${answerText}`, 40, yPos, { width: doc.page.width - 70 });
-        const textHeight = doc.heightOfString(`Answer: ${answerText}`, { width: doc.page.width - 70 });
-        yPos += Math.max(10, textHeight + 2);
+        
+        // Answer with light green bg
+        const answerHeight = doc.heightOfString(`Answer: ${answerText}`, { width: doc.page.width - 78 });
+        doc.rect(40, yPos - 1, doc.page.width - 70, Math.max(10, answerHeight + 3)).fill('#f0faf3');
+        doc.fillColor(DARK)
+          .text(`Answer: ${answerText}`, 44, yPos, { width: doc.page.width - 78 });
+        yPos += Math.max(10, answerHeight + 4);
 
         if (otherAnswer) {
-          doc.text(`Other: ${otherAnswer}`, 40, yPos, { width: doc.page.width - 70 });
-          const otherHeight = doc.heightOfString(`Other: ${otherAnswer}`, { width: doc.page.width - 70 });
+          doc.fillColor(GRAY)
+            .text(`Other: ${otherAnswer}`, 44, yPos, { width: doc.page.width - 78 });
+          const otherHeight = doc.heightOfString(`Other: ${otherAnswer}`, { width: doc.page.width - 78 });
           yPos += Math.max(10, otherHeight + 2);
         }
 
@@ -453,62 +513,84 @@ const generatePDF = async (surveyData, trackingCode) => {
       yPos = printCompactAnswer('Which of the following magazines do you read?', formData.magazines, formData.magazinesOther, '5');
 
       // Question 6
-      if (yPos + 30 > doc.page.height - 30) {
+      if (yPos + 30 > doc.page.height - 35) {
         addFooter(pageNum, 5, false);
         doc.addPage();
         pageNum++;
         addMinimalHeader();
-        yPos = 40;
+        yPos = 45;
       }
 
       yPos += 3;
+      doc.fillColor(GREEN)
+        .fontSize(6)
+        .font('Helvetica-Bold')
+        .text('6.', 30, yPos + 1);
+      
       doc.fillColor(DARK).fontSize(7).font('Helvetica-Bold');
-      doc.text('6. How likely are you to recommend CNG as an energy solution?', 30, yPos);
-      yPos += 11;
+      doc.text('How likely are you to recommend CNG as an energy solution?', 38, yPos, { width: doc.page.width - 70 });
+      yPos += 12;
+      
       doc.font('Helvetica').fontSize(7);
-      doc.text(`Score (1-10): ${formData.recommendScore || 'Not specified'}`, 40, yPos);
-      yPos += 10;
+      
+      // Score with green bg
+      const scoreText = `Score (1-10): ${formData.recommendScore || 'Not specified'}`;
+      doc.rect(40, yPos - 1, doc.page.width - 70, 10).fill('#f0faf3');
+      doc.fillColor(DARK)
+        .text(scoreText, 44, yPos, { width: doc.page.width - 78 });
+      yPos += 12;
+      
       if (formData.recommendReason) {
-        doc.text(`Reason: ${formData.recommendReason}`, 40, yPos, { width: doc.page.width - 70 });
-        const reasonHeight = doc.heightOfString(`Reason: ${formData.recommendReason}`, { width: doc.page.width - 70 });
+        doc.fillColor(GRAY)
+          .text(`Reason: ${formData.recommendReason}`, 44, yPos, { width: doc.page.width - 78 });
+        const reasonHeight = doc.heightOfString(`Reason: ${formData.recommendReason}`, { width: doc.page.width - 78 });
         yPos += Math.max(10, reasonHeight + 2);
       }
 
-      // Business Name
-      if (yPos + 25 > doc.page.height - 30) {
+      // Business Name & Email
+      if (yPos + 30 > doc.page.height - 35) {
         addFooter(pageNum, 5, false);
         doc.addPage();
         pageNum++;
         addMinimalHeader();
-        yPos = 40;
+        yPos = 45;
       }
 
       yPos += 3;
+      
+      // Contact info box
+      doc.rect(30, yPos, doc.page.width - 60, 25).fill('#f0faf3');
+      doc.rect(30, yPos, doc.page.width - 60, 25).lineWidth(1).stroke(GREEN);
+      
       doc.fillColor(DARK).fontSize(7).font('Helvetica-Bold');
-      doc.text('Name / Business Name:', 30, yPos);
-      yPos += 11;
-      doc.font('Helvetica').fontSize(7);
-      doc.text(formData.businessName || 'Not specified', 40, yPos);
-      yPos += 12;
+      doc.text('Contact Information (For Tracking Purposes Only):', 40, yPos + 3, { width: doc.page.width - 80 });
+      
+      doc.font('Helvetica').fontSize(6.5);
+      doc.text(`Name / Company: ${formData.businessName || 'Not specified'}`, 40, yPos + 14, { width: (doc.page.width - 80) / 2 - 5 });
+      doc.text(`Email: ${formData.email || 'Not specified'}`, 40 + (doc.page.width - 80) / 2 + 5, yPos + 14, { width: (doc.page.width - 80) / 2 - 5 });
+      
+      yPos += 30;
 
-      // Closing line
-      yPos = Math.max(yPos + 10, doc.page.height - 60);
-      doc.rect(30, yPos, doc.page.width - 60, 1).fill(RED);
-      yPos += 8;
-      doc.fillColor(RED)
-        .fontSize(10)
+      // Closing line with green
+      yPos = Math.max(yPos + 10, doc.page.height - 65);
+      
+      // Green/orange gradient divider
+      doc.rect(30, yPos, doc.page.width - 60, 3).fill(GREEN);
+      doc.rect(30, yPos, (doc.page.width - 60) / 2, 3).fill(ORANGE);
+      
+      yPos += 10;
+      doc.fillColor(GREEN)
+        .fontSize(11)
         .font('Helvetica-Bold')
         .text('THANK YOU FOR YOUR INSIGHTS', 30, yPos, { width: doc.page.width - 60, align: 'center' });
-      yPos += 12;
+      yPos += 13;
       doc.fillColor(GRAY)
         .fontSize(6)
         .font('Helvetica')
         .text('Responses secured & protected with total data anonymity by Rob Daniel Associates', 30, yPos, { width: doc.page.width - 60, align: 'center' });
 
-      // Last page footer with "Generated by SmartMat Technologies"
+      // Last page footer
       addFooter(pageNum, 5, true);
-
-      // ===== FINALIZE: No footer/page numbers needed =====
 
       // Finalize PDF
       doc.end();
