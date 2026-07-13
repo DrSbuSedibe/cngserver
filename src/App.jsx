@@ -283,12 +283,7 @@ const App = () => {
         {submitted && (
           <div className="cng-success-message">
             <h2>✓ Survey Submitted Successfully</h2>
-            <p>Your tracking number is:</p>
-            <div className="tracking-code">{trackingCode}</div>
-            <p>Thank you for completing the survey.</p>
-            <p style={{ fontSize: '0.85rem', color: '#888', marginTop: '12px' }}>
-              Your responses have been securely submitted and the PDF email has been accepted by Gmail for delivery.
-            </p>
+            <p>Your responses have been securely submitted.</p>
           </div>
         )}
 
