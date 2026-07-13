@@ -345,20 +345,6 @@ const App = () => {
 
             {/* SECTION 1 - MATRIX 1-15 */}
             <div ref={pdfRef}>
-              {/* INSTRUCTION BOX */}
-              <div className="cng-card" style={{ background: '#f0faf3', borderLeft: '4px solid var(--cng-green)' }}>
-                <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
-                  Firstly, please select the appropriate button opposite each of the criteria that best reflects your experience with CNG where:
-                </p>
-                <ul style={{ fontSize: '0.8rem', color: '#555', lineHeight: 1.7, margin: '8px 0 0 0', paddingLeft: '20px' }}>
-                  <li><strong>1</strong> means Poor/Not at All Satisfied</li>
-                  <li><strong>2</strong> means Below Average</li>
-                  <li><strong>3</strong> means Average, About the Same as Others</li>
-                  <li><strong>4</strong> means Above Average</li>
-                  <li><strong>5</strong> means Excellent/Extremely Satisfied</li>
-                </ul>
-              </div>
-
               <div className="cng-card">
                 <div className="cng-card-header">
                   <div className="cng-card-number">1</div>
@@ -366,6 +352,19 @@ const App = () => {
                     <div className="cng-card-title">Section 1 of 4: Performance & Importance Matrix</div>
                     <div className="cng-card-subtitle">Items 1 - 15</div>
                   </div>
+                </div>
+                {/* INSTRUCTION */}
+                <div style={{ background: '#f0faf3', borderLeft: '4px solid var(--cng-green)', padding: '14px 16px', marginBottom: '14px', borderRadius: '6px' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
+                    Please Click the appropriate circles that best reflect your experience with CNG where:
+                  </p>
+                  <ul style={{ fontSize: '0.8rem', color: '#555', lineHeight: 1.7, margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                    <li><strong>1</strong> means Poor/Not at All Satisfied</li>
+                    <li><strong>2</strong> means Below Average</li>
+                    <li><strong>3</strong> means Average, About the Same as Others</li>
+                    <li><strong>4</strong> means Above Average</li>
+                    <li><strong>5</strong> means Excellent/Extremely Satisfied</li>
+                  </ul>
                 </div>
                 <div className="cng-info-row">
                   <div className="cng-section-subtitle">
