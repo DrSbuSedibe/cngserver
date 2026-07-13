@@ -229,12 +229,12 @@ const App = () => {
       <table className="cng-comp-table">
         <thead>
           <tr>
-            <th style={{ width: '30px' }}>#</th>
-            <th style={{ textAlign: 'left' }}>EVALUATION CRITERIA</th>
-            <th style={{ minWidth: '130px' }}>ACTUAL (CNG)</th>
-            <th style={{ minWidth: '130px' }}>EXPECTED</th>
-            <th style={{ minWidth: '130px' }}>BEST COMPETITOR</th>
-            <th style={{ minWidth: '90px' }}>IMPORTANCE</th>
+            <th style={{ width: '30px', fontSize: '0.65rem' }}>#</th>
+            <th style={{ textAlign: 'left', fontSize: '0.65rem' }}>EVALUATION CRITERIA</th>
+            <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>ACTUAL PERFORMANCE FROM (CNG)</th>
+            <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>EXPECTED PERFORMANCE</th>
+            <th style={{ minWidth: '130px', fontSize: '0.65rem' }}>BEST COMPETITOR'S PERFORMANCE</th>
+            <th style={{ minWidth: '90px', fontSize: '0.65rem' }}>IMPORTANCE LEVEL</th>
           </tr>
         </thead>
         <tbody>
@@ -404,7 +404,7 @@ const App = () => {
                 {/* INSTRUCTION */}
                 <div style={{ background: '#f0faf3', borderLeft: '4px solid var(--cng-green)', padding: '14px 16px', marginBottom: '14px', borderRadius: '6px' }}>
                   <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
-                    Please Click the appropriate circles that best reflect your experience with CNG and What the importance levels are for each of the items below where:
+                    Please Click the appropriate circles that best reflect your experience with CNG and what the importance levels are for each of the items below where:
                   </p>
                 </div>
                 <div className="cng-info-row">
