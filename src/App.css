@@ -446,7 +446,7 @@ select.cng-input {
   display: flex;
   gap: 6px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .cng-radio-label {
@@ -588,7 +588,7 @@ select.cng-input {
 }
 
 .cng-comp-table th {
-  background: var(--cng-dark);
+  background: var(--cng-orange);
   color: white;
   font-family: var(--font-secondary);
   font-size: 0.75rem;
