@@ -603,10 +603,10 @@ select.cng-input {
 
 /* ===== CONTACT INFO CARD ===== */
 .cng-contact-box {
-  background: var(--cng-light-bg);
+  background: #f0faf3;
   border-radius: var(--cng-radius-xs);
   padding: 20px;
-  border: 1.5px solid var(--cng-border-light);
+  border: 1.5px solid var(--cng-green-light);
 }
 
 .cng-contact-grid {
