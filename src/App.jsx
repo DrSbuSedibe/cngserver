@@ -196,11 +196,11 @@ const App = () => {
   };
 
   const sections = [
-    { id: 1, label: 'Matrix 1-15' },
-    { id: 2, label: 'Matrix 16-30' },
-    { id: 3, label: 'Matrix 31-40' },
-    { id: 4, label: 'Competitive' },
-    { id: 5, label: 'Questions' }
+    { id: 1, label: 'Questions' },
+    { id: 2, label: 'Matrix 1-15' },
+    { id: 3, label: 'Matrix 16-30' },
+    { id: 4, label: 'Matrix 31-40' },
+    { id: 5, label: 'Competitive' }
   ];
 
   const getSectionStatus = (sectionId) => {
@@ -326,7 +326,7 @@ const App = () => {
                 <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>i</div>
                 <div>
                   <div className="cng-card-title">Contact Information</div>
-                  <div className="cng-card-subtitle" style={{ fontWeight: 800, color: '#b30015', fontSize: '0.9rem' }}>FOR TRACKING PURPOSES ONLY</div>
+                  <div className="cng-card-subtitle" style={{ fontWeight: 800, color: 'var(--cng-orange)', fontSize: '0.9rem' }}>FOR TRACKING PURPOSES ONLY</div>
                 </div>
               </div>
               <div className="cng-contact-box">
@@ -358,13 +358,6 @@ const App = () => {
                   <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
                     Please Click the appropriate circles that best reflect your experience with CNG where:
                   </p>
-                  <ul style={{ fontSize: '0.8rem', color: '#555', lineHeight: 1.7, margin: '8px 0 0 0', paddingLeft: '20px' }}>
-                    <li><strong>1</strong> means Poor/Not at All Satisfied</li>
-                    <li><strong>2</strong> means Below Average</li>
-                    <li><strong>3</strong> means Average, About the Same as Others</li>
-                    <li><strong>4</strong> means Above Average</li>
-                    <li><strong>5</strong> means Excellent/Extremely Satisfied</li>
-                  </ul>
                 </div>
                 <div className="cng-info-row">
                   <div className="cng-section-subtitle">

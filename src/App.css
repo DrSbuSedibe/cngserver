@@ -20,20 +20,13 @@
 
 .cng-logo {
   width: auto;
-  height: 100px;
+  height: 140px;
   object-fit: contain;
-  max-width: 320px;
+  max-width: 400px;
 }
 
 .cng-company-name {
-  font-family: var(--font-logo);
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--cng-dark);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-top: 12px;
-  line-height: 1.1;
+  display: none;
 }
 
 .cng-divider {
@@ -452,12 +445,12 @@ select.cng-input {
 .cng-radio-label {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   cursor: pointer;
   font-family: var(--font-primary);
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--cng-dark);
-  padding: 6px 10px;
+  padding: 3px 6px;
   background: var(--cng-light-bg);
   border-radius: var(--cng-radius-xs);
   border: 1.5px solid transparent;
