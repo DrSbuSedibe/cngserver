@@ -445,15 +445,15 @@ select.cng-input {
 .cng-radio-label {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   cursor: pointer;
   font-family: var(--font-primary);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--cng-dark);
-  padding: 3px 6px;
+  padding: 2px 5px;
   background: var(--cng-light-bg);
-  border-radius: var(--cng-radius-xs);
-  border: 1.5px solid transparent;
+  border-radius: 4px;
+  border: 1px solid transparent;
   transition: all 0.2s ease;
 }
 

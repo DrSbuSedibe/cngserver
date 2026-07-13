@@ -343,16 +343,16 @@ const App = () => {
               </div>
             </div>
 
-            {/* SECTION 1 - MATRIX 1-15 */}
-            <div ref={pdfRef}>
-              <div className="cng-card">
-                <div className="cng-card-header">
-                  <div className="cng-card-number">1</div>
-                  <div>
-                    <div className="cng-card-title">Section 1 of 4: Performance & Importance Matrix</div>
-                    <div className="cng-card-subtitle">Items 1 - 15</div>
+              {/* SECTION 2 - MATRIX 1-15 */}
+              <div ref={pdfRef}>
+                <div className="cng-card">
+                  <div className="cng-card-header">
+                    <div className="cng-card-number">2</div>
+                    <div>
+                      <div className="cng-card-title">Section 2 of 4: Performance & Importance Matrix</div>
+                      <div className="cng-card-subtitle">Items 1 - 15</div>
+                    </div>
                   </div>
-                </div>
                 {/* INSTRUCTION */}
                 <div style={{ background: '#f0faf3', borderLeft: '4px solid var(--cng-green)', padding: '14px 16px', marginBottom: '14px', borderRadius: '6px' }}>
                   <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
@@ -367,12 +367,12 @@ const App = () => {
                 {renderMatrixTable(criteriaRows.slice(0, 15))}
               </div>
 
-              {/* SECTION 1 - MATRIX 16-30 */}
+              {/* SECTION 2 - MATRIX 16-30 */}
               <div className="cng-card">
                 <div className="cng-card-header">
                   <div className="cng-card-number">2</div>
                   <div>
-                    <div className="cng-card-title">Section 1 of 4: Performance & Importance Matrix</div>
+                    <div className="cng-card-title">Section 2 of 4: Performance & Importance Matrix</div>
                     <div className="cng-card-subtitle">Items 16 - 30</div>
                   </div>
                 </div>
@@ -384,12 +384,12 @@ const App = () => {
                 {renderMatrixTable(criteriaRows.slice(15, 30))}
               </div>
 
-              {/* SECTION 1 - MATRIX 31-40 */}
+              {/* SECTION 2 - MATRIX 31-40 */}
               <div className="cng-card">
                 <div className="cng-card-header">
-                  <div className="cng-card-number">3</div>
+                  <div className="cng-card-number">2</div>
                   <div>
-                    <div className="cng-card-title">Section 1 of 4: Performance & Importance Matrix</div>
+                    <div className="cng-card-title">Section 2 of 4: Performance & Importance Matrix</div>
                     <div className="cng-card-subtitle">Items 31 - 40</div>
                   </div>
                 </div>
@@ -401,12 +401,12 @@ const App = () => {
                 {renderMatrixTable(criteriaRows.slice(30, 40))}
               </div>
 
-              {/* SECTION 2 - COMPETITIVE LANDSCAPE */}
+              {/* SECTION 3 - COMPETITIVE LANDSCAPE */}
               <div className="cng-card">
                 <div className="cng-card-header">
-                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>4</div>
+                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>3</div>
                   <div>
-                    <div className="cng-card-title">Section 2 of 4: Competitive Landscape</div>
+                    <div className="cng-card-title">Section 3 of 4: Competitive Landscape</div>
                     <div className="cng-card-subtitle">Rank CNG against alternative market competitors (Rank 1 = Highest Peer Performance)</div>
                   </div>
                 </div>
@@ -447,12 +447,12 @@ const App = () => {
                 </div>
               </div>
 
-              {/* SECTION 3 - GENERAL QUESTIONS */}
+              {/* SECTION 1 - GENERAL QUESTIONS */}
               <div className="cng-card">
                 <div className="cng-card-header">
-                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>5</div>
+                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>1</div>
                   <div>
-                    <div className="cng-card-title">Section 3 of 4: General Configuration Questions</div>
+                    <div className="cng-card-title">Section 1 of 4: General Configuration Questions</div>
                   </div>
                 </div>
 
@@ -498,7 +498,7 @@ const App = () => {
               {/* SECTION 4 - STRATEGIC INSIGHTS */}
               <div className="cng-card">
                 <div className="cng-card-header">
-                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>6</div>
+                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>4</div>
                   <div>
                     <div className="cng-card-title">Section 4 of 4: Strategic Insights & Feedback</div>
                   </div>
