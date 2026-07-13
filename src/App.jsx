@@ -404,7 +404,7 @@ const App = () => {
                 {/* INSTRUCTION */}
                 <div style={{ background: '#f0faf3', borderLeft: '4px solid var(--cng-green)', padding: '14px 16px', marginBottom: '14px', borderRadius: '6px' }}>
                   <p style={{ fontSize: '0.85rem', color: '#333', lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
-                    Please Click the appropriate circles that best reflect your experience with CNG where:
+                    Please Click the appropriate circles that best reflect your experience with CNG and What the importance levels are for each of the items below where:
                   </p>
                 </div>
                 <div className="cng-info-row">
