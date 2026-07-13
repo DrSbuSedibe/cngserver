@@ -445,14 +445,14 @@ select.cng-input {
 .cng-radio-label {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   cursor: pointer;
   font-family: var(--font-primary);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--cng-dark);
-  padding: 2px 5px;
+  padding: 1px 3px;
   background: var(--cng-light-bg);
-  border-radius: 4px;
+  border-radius: 3px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
 }
@@ -476,7 +476,7 @@ select.cng-input {
 
 .cng-importance-label {
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .cng-importance-label input[type="radio"]:checked + span,

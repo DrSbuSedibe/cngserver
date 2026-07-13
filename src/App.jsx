@@ -343,6 +343,54 @@ const App = () => {
               </div>
             </div>
 
+              {/* SECTION 1 - GENERAL QUESTIONS */}
+              <div className="cng-card">
+                <div className="cng-card-header">
+                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>1</div>
+                  <div>
+                    <div className="cng-card-title">Section 1 of 4: General Configuration Questions</div>
+                  </div>
+                </div>
+
+                <div className="cng-field">
+                  <label className="cng-label">1. Which Function best matches your job function?</label>
+                  <div className="cng-checkbox-grid">
+                    {['Owner/Director', 'General Management', 'Manufacturing/Operations', 'Technical', 'Quality', 'Purchasing/Procurement'].map(opt => (
+                      <label key={opt} className="cng-checkbox-label">
+                        <input type="radio" name="jobFunction" value={opt} checked={formData.jobFunction === opt} onChange={handleFormChange} />
+                        {opt}
+                      </label>
+                    ))}
+                  </div>
+                  <input type="text" name="jobFunctionOther" className="cng-input" style={{ marginTop: '8px' }} placeholder="Other function (Specify)" value={formData.jobFunctionOther} onChange={handleFormChange} />
+                </div>
+
+                <div className="cng-field">
+                  <label className="cng-label">2. Which descriptor best matches your current operating relationship with CNG?</label>
+                  <div className="cng-checkbox-grid">
+                    {['Strong business partner', 'Trusted technical adviser', 'Good supplier', 'Vendor/Supplier', "Don't know"].map(opt => (
+                      <label key={opt} className="cng-checkbox-label">
+                        <input type="radio" name="relationship" value={opt} checked={formData.relationship === opt} onChange={handleFormChange} />
+                        {opt}
+                      </label>
+                    ))}
+                  </div>
+                  <input type="text" name="relationshipOther" className="cng-input" style={{ marginTop: '8px' }} placeholder="Other relationship terms" value={formData.relationshipOther} onChange={handleFormChange} />
+                </div>
+
+                <div className="cng-field">
+                  <label className="cng-label">3. When taking deliveries from CNG, How important is after sales service?</label>
+                  <div className="cng-checkbox-grid">
+                    {['High Importance', 'Medium Importance', 'Low Importance'].map(opt => (
+                      <label key={opt} className="cng-checkbox-label">
+                        <input type="radio" name="afterSalesImportance" value={opt} checked={formData.afterSalesImportance === opt} onChange={handleFormChange} />
+                        {opt}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* SECTION 2 - MATRIX 1-15 */}
               <div ref={pdfRef}>
                 <div className="cng-card">
@@ -444,54 +492,6 @@ const App = () => {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              </div>
-
-              {/* SECTION 1 - GENERAL QUESTIONS */}
-              <div className="cng-card">
-                <div className="cng-card-header">
-                  <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>1</div>
-                  <div>
-                    <div className="cng-card-title">Section 1 of 4: General Configuration Questions</div>
-                  </div>
-                </div>
-
-                <div className="cng-field">
-                  <label className="cng-label">1. Which Function best matches your job function?</label>
-                  <div className="cng-checkbox-grid">
-                    {['Owner/Director', 'General Management', 'Manufacturing/Operations', 'Technical', 'Quality', 'Purchasing/Procurement'].map(opt => (
-                      <label key={opt} className="cng-checkbox-label">
-                        <input type="radio" name="jobFunction" value={opt} checked={formData.jobFunction === opt} onChange={handleFormChange} />
-                        {opt}
-                      </label>
-                    ))}
-                  </div>
-                  <input type="text" name="jobFunctionOther" className="cng-input" style={{ marginTop: '8px' }} placeholder="Other function (Specify)" value={formData.jobFunctionOther} onChange={handleFormChange} />
-                </div>
-
-                <div className="cng-field">
-                  <label className="cng-label">2. Which descriptor best matches your current operating relationship with CNG?</label>
-                  <div className="cng-checkbox-grid">
-                    {['Strong business partner', 'Trusted technical adviser', 'Good supplier', 'Vendor/Supplier', "Don't know"].map(opt => (
-                      <label key={opt} className="cng-checkbox-label">
-                        <input type="radio" name="relationship" value={opt} checked={formData.relationship === opt} onChange={handleFormChange} />
-                        {opt}
-                      </label>
-                    ))}
-                  </div>
-                  <input type="text" name="relationshipOther" className="cng-input" style={{ marginTop: '8px' }} placeholder="Other relationship terms" value={formData.relationshipOther} onChange={handleFormChange} />
-                </div>
-
-                <div className="cng-field">
-                  <label className="cng-label">3. When taking deliveries from CNG, How important is after sales service?</label>
-                  <div className="cng-checkbox-grid">
-                    {['High Importance', 'Medium Importance', 'Low Importance'].map(opt => (
-                      <label key={opt} className="cng-checkbox-label">
-                        <input type="radio" name="afterSalesImportance" value={opt} checked={formData.afterSalesImportance === opt} onChange={handleFormChange} />
-                        {opt}
-                      </label>
-                    ))}
-                  </div>
                 </div>
               </div>
 
