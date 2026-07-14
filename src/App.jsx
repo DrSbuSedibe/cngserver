@@ -258,21 +258,8 @@ const App = () => {
       <div className="cng-container">
         {/* BRANDING HEADER */}
         <header className="cng-header">
-          <div className="cng-logo-container">
-            <img
-              src="/logo.png"
-              alt="CNG Holdings"
-              className="cng-logo"
-            />
-            <img
-              src="/logo2.png"
-              alt="CNG Holdings"
-              className="cng-logo cng-logo-second"
-            />
-            <div className="cng-company-name">CNG Holdings</div>
-          </div>
-          <div className="cng-divider" />
           <div className="cng-form-title">Customer Satisfaction Survey 2026</div>
+          <div className="cng-divider" />
         </header>
 
         <div className="cng-header-spacing" />
@@ -350,6 +337,14 @@ const App = () => {
 
               {/* SECTION 1 - GENERAL QUESTIONS */}
               <div className="cng-card">
+                <div className="cng-logo-container" style={{ marginBottom: '16px' }}>
+                  <img
+                    src="/logo.png"
+                    alt="CNG Holdings"
+                    className="cng-logo"
+                    style={{ height: '100px', maxWidth: '280px' }}
+                  />
+                </div>
                 <div className="cng-card-header">
                   <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>1</div>
                   <div>
@@ -456,6 +451,14 @@ const App = () => {
 
               {/* SECTION 3 - COMPETITIVE LANDSCAPE */}
               <div className="cng-card">
+                <div className="cng-logo-container" style={{ marginBottom: '16px' }}>
+                  <img
+                    src="/logo2.png"
+                    alt="CNG Holdings"
+                    className="cng-logo"
+                    style={{ height: '100px', maxWidth: '280px' }}
+                  />
+                </div>
                 <div className="cng-card-header">
                   <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>3</div>
                   <div>
