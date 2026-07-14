@@ -264,6 +264,11 @@ const App = () => {
               alt="CNG Holdings"
               className="cng-logo"
             />
+            <img
+              src="/logo2.png"
+              alt="CNG Holdings"
+              className="cng-logo cng-logo-second"
+            />
             <div className="cng-company-name">CNG Holdings</div>
           </div>
           <div className="cng-divider" />
