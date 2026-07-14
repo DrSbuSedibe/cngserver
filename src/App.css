@@ -26,15 +26,15 @@
 .cng-logos-secondary {
   display: flex;
   justify-content: center;
-  gap: 32px;
-  margin-top: 16px;
+  gap: 64px;
+  margin-top: 20px;
 }
 
 .cng-logo-secondary {
   width: auto;
-  height: 80px;
+  height: 60px;
   object-fit: contain;
-  max-width: 200px;
+  max-width: 150px;
 }
 
 .cng-company-name {
