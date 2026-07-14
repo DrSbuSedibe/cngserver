@@ -258,8 +258,22 @@ const App = () => {
       <div className="cng-container">
         {/* BRANDING HEADER */}
         <header className="cng-header">
-          <div className="cng-form-title">Customer Satisfaction Survey 2026</div>
+          <div className="cng-logo-container">
+            <img
+              src="/logo.png"
+              alt="CNG Holdings"
+              className="cng-logo"
+              style={{ height: '100px', maxWidth: '280px' }}
+            />
+            <img
+              src="/logo2.png"
+              alt="CNG Holdings"
+              className="cng-logo"
+              style={{ height: '100px', maxWidth: '280px' }}
+            />
+          </div>
           <div className="cng-divider" />
+          <div className="cng-form-title">Customer Satisfaction Survey 2026</div>
         </header>
 
         <div className="cng-header-spacing" />
@@ -281,7 +295,7 @@ const App = () => {
 
         {!submitted && (
           <>
-            {/* PROGRESS BAR WITH LOGOS */}
+            {/* PROGRESS BAR */}
             <div className="cng-progress-bar">
               <div className="cng-progress-steps">
                 {sections.map((section, idx) => (
@@ -290,12 +304,6 @@ const App = () => {
                       <div className={`cng-progress-connector ${getSectionStatus(section.id) === 'completed' ? 'completed' : getSectionStatus(section.id) === 'active' ? 'active' : ''}`} />
                     )}
                     <div className={`cng-progress-dot ${getSectionStatus(section.id)}`} />
-                    {section.id === 1 && (
-                      <img src="/logo.png" alt="CNG" className="cng-progress-logo" />
-                    )}
-                    {section.id === 5 && (
-                      <img src="/logo2.png" alt="CNG" className="cng-progress-logo" />
-                    )}
                     <div className={`cng-progress-label ${getSectionStatus(section.id)}`}>
                       {section.label}
                     </div>
@@ -343,14 +351,6 @@ const App = () => {
 
               {/* SECTION 1 - GENERAL QUESTIONS */}
               <div className="cng-card">
-                <div className="cng-logo-container" style={{ marginBottom: '16px' }}>
-                  <img
-                    src="/logo.png"
-                    alt="CNG Holdings"
-                    className="cng-logo"
-                    style={{ height: '100px', maxWidth: '280px' }}
-                  />
-                </div>
                 <div className="cng-card-header">
                   <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>1</div>
                   <div>
@@ -457,14 +457,6 @@ const App = () => {
 
               {/* SECTION 3 - COMPETITIVE LANDSCAPE */}
               <div className="cng-card">
-                <div className="cng-logo-container" style={{ marginBottom: '16px' }}>
-                  <img
-                    src="/logo2.png"
-                    alt="CNG Holdings"
-                    className="cng-logo"
-                    style={{ height: '100px', maxWidth: '280px' }}
-                  />
-                </div>
                 <div className="cng-card-header">
                   <div className="cng-card-number" style={{ background: 'var(--cng-orange)' }}>3</div>
                   <div>
