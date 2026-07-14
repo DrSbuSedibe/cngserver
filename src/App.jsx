@@ -262,18 +262,23 @@ const App = () => {
             <img
               src="/logo.png"
               alt="CNG Holdings"
-              className="cng-logo"
-              style={{ height: '100px', maxWidth: '280px' }}
-            />
-            <img
-              src="/logo2.png"
-              alt="CNG Holdings"
-              className="cng-logo"
-              style={{ height: '100px', maxWidth: '280px' }}
+              className="cng-logo cng-logo-main"
             />
           </div>
           <div className="cng-divider" />
           <div className="cng-form-title">Customer Satisfaction Survey 2026</div>
+          <div className="cng-logos-secondary">
+            <img
+              src="/logo3.png"
+              alt="CNG Holdings"
+              className="cng-logo-secondary"
+            />
+            <img
+              src="/logo4.png"
+              alt="CNG Holdings"
+              className="cng-logo-secondary"
+            />
+          </div>
         </header>
 
         <div className="cng-header-spacing" />

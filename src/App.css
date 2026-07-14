@@ -12,18 +12,29 @@
 
 .cng-logo-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: center;
-  gap: 48px;
   margin-bottom: 8px;
 }
 
-.cng-logo {
+.cng-logo-main {
   width: auto;
-  height: 140px;
+  height: 160px;
   object-fit: contain;
-  max-width: 400px;
+  max-width: 450px;
+}
+
+.cng-logos-secondary {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+.cng-logo-secondary {
+  width: auto;
+  height: 80px;
+  object-fit: contain;
+  max-width: 200px;
 }
 
 .cng-company-name {
