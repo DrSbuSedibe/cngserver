@@ -281,7 +281,7 @@ const App = () => {
 
         {!submitted && (
           <>
-            {/* PROGRESS BAR */}
+            {/* PROGRESS BAR WITH LOGOS */}
             <div className="cng-progress-bar">
               <div className="cng-progress-steps">
                 {sections.map((section, idx) => (
@@ -290,6 +290,12 @@ const App = () => {
                       <div className={`cng-progress-connector ${getSectionStatus(section.id) === 'completed' ? 'completed' : getSectionStatus(section.id) === 'active' ? 'active' : ''}`} />
                     )}
                     <div className={`cng-progress-dot ${getSectionStatus(section.id)}`} />
+                    {section.id === 1 && (
+                      <img src="/logo.png" alt="CNG" className="cng-progress-logo" />
+                    )}
+                    {section.id === 5 && (
+                      <img src="/logo2.png" alt="CNG" className="cng-progress-logo" />
+                    )}
                     <div className={`cng-progress-label ${getSectionStatus(section.id)}`}>
                       {section.label}
                     </div>

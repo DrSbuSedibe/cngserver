@@ -156,6 +156,13 @@
   background: linear-gradient(90deg, var(--cng-green), var(--cng-orange));
 }
 
+.cng-progress-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  margin-top: 4px;
+}
+
 /* ===== SUBMIT ERROR / SUCCESS ===== */
 .cng-submit-alert {
   max-width: var(--cng-max-width);
